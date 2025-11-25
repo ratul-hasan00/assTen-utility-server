@@ -94,21 +94,6 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/bills/:id', async (req, res) => {
-            const id = req.params.id;
-            const updatedBill = req.body;
-
-            const query = { _id: new ObjectId(id) };
-            const update = {
-                $set: {
-                    name: updatedBill.name,
-                    price: updatedBill.price
-                }
-            };
-
-            const result = await billsCollections.updateOne(query, update);
-            res.send(result);
-        });
         // ----------------------- PAYMENT BILLS -----------------------
 
         // Get all payment bills
