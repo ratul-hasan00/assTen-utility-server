@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection URI
+
 const uri = "mongodb+srv://simpleDB:BBt8131hyL7v8lJ5@cluster0.5cp4gli.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
