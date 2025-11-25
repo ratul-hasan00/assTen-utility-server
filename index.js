@@ -1,15 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection URI
-const uri = "mongodb+srv://simpleDB:BBt8131hyL7v8lJ5@cluster0.5cp4gli.mongodb.net/?appName=Cluster0";
+const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}
+@cluster0.5cp4gli.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -34,12 +34,10 @@ async function run() {
 
         // ----------------------- USERS RELATED -----------------------
 
-        // Create user (manual + Google register)
         app.post('/users', async (req, res) => {
             const newUser = req.body;
             console.log("Received user:", newUser);
 
-            // Check if user exists already
             const exists = await userCollections.findOne({ email: newUser.email });
             if (exists) {
                 return res.send({ message: "User already exists" });
@@ -49,7 +47,7 @@ async function run() {
             res.send(result);
         });
 
-        // Update user profile (name, photo)
+
         app.patch('/users/:email', async (req, res) => {
             const email = req.params.email;
             const updatedUser = req.body;
@@ -96,11 +94,11 @@ async function run() {
 
         // ----------------------- PAYMENT BILLS -----------------------
 
-        // Get all payment bills
+
         app.get('/payment-bills', async (req, res) => {
             const email = req.query.email;
             let query = {};
-            if (email) query = { email: email }; // fetch user-specific payments
+            if (email) query = { email: email };
 
             const result = await paymentCollections.find(query).toArray();
             res.send(result);
@@ -145,7 +143,7 @@ async function run() {
         console.log("Pinged your deployment. Connected to MongoDB!");
 
     } finally {
-        // client.close();  // keep open
+        client.close();  
     }
 }
 
