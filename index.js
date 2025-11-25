@@ -30,6 +30,7 @@ async function run() {
         const db = client.db('smart_db');
         const billsCollections = db.collection('bills');
         const userCollections = db.collection('users');
+        const paymentCollections = db.collection('paymentBills');
 
         // ----------------------- USERS RELATED -----------------------
 
@@ -68,7 +69,14 @@ async function run() {
         // ----------------------- BILLS CRUD -----------------------
 
         app.get('/bills', async (req, res) => {
-            const cursor = billsCollections.find();
+            const category = req.query.category;
+            let query = {};
+
+            if (category && category !== "All") {
+                query = { category: category };
+            }
+
+            const cursor = billsCollections.find(query);
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -101,13 +109,51 @@ async function run() {
             const result = await billsCollections.updateOne(query, update);
             res.send(result);
         });
+        // ----------------------- PAYMENT BILLS -----------------------
 
-        app.delete('/bills/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await billsCollections.deleteOne(query);
+        // Get all payment bills
+        app.get('/payment-bills', async (req, res) => {
+            const email = req.query.email;
+            let query = {};
+            if (email) query = { email: email }; // fetch user-specific payments
+
+            const result = await paymentCollections.find(query).toArray();
             res.send(result);
         });
+
+        // Get payment by ID
+        app.get('/payment-bills/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await paymentCollections.findOne({ _id: new ObjectId(id) });
+            res.send(result);
+        });
+
+        // Create new payment
+        app.post('/payment-bills', async (req, res) => {
+            const newPayment = req.body;
+            const result = await paymentCollections.insertOne(newPayment);
+            res.send(result);
+        });
+
+        // Update payment by ID
+        app.patch('/payment-bills/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedPayment = req.body;
+
+            const result = await paymentCollections.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedPayment }
+            );
+            res.send(result);
+        });
+
+        // Delete payment by ID
+        app.delete('/payment-bills/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await paymentCollections.deleteOne({ _id: new ObjectId(id) });
+            res.send(result);
+        });
+
 
         // Successful connection
         await client.db("admin").command({ ping: 1 });
